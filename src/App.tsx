@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function App() {
-  const [started, setStarted] = useState(() => localStorage.getItem('japan-journey-started') === 'true');
+  const [started, setStarted] = useState(false);
   const [user, setUser] = useState<User | null>(() => localStorage.getItem('japan-journey-user') as User | null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
