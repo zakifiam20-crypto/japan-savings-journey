@@ -15,6 +15,7 @@ import {
 import { format, startOfWeek, endOfWeek, eachWeekOfInterval, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import confetti from 'canvas-confetti';
 
 function TypewriterText() {
   const texts = [
@@ -167,6 +168,12 @@ export default function App() {
       setIsAdding(false);
       fetchTransactions();
       alert('Tabungan berhasil disimpan! 🎉');
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#BC002D', '#ff4d6d', '#fff', '#FFD700']
+      });
     } catch (err: any) {
       console.error('Error adding transaction:', err);
       alert(`Gagal menyimpan: ${err.message || 'Terjadi kesalahan'}`);
@@ -174,7 +181,6 @@ export default function App() {
       setSubmitting(false);
     }
   };
-
   const totalUser1 = transactions
     .filter(t => t.user_name === 'Fiam Zaki')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -452,13 +458,33 @@ export default function App() {
             </div>
           </div>
 
-          <div className="relative h-4 bg-slate-100 rounded-full overflow-hidden mb-8">
-            <motion.div 
+          <div className="relative h-6 bg-slate-100 rounded-full overflow-hidden mb-8 shadow-inner">
+            <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="absolute top-0 left-0 h-full bg-japan-red shadow-[0_0_15px_rgba(188,0,45,0.4)]"
-            />
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="absolute top-0 left-0 h-full rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, #BC002D, #ff4d6d, #FFD700)',
+                boxShadow: '0 0 20px rgba(188,0,45,0.6)'
+              }}
+            >
+              {/* Shimmer effect */}
+              <motion.div
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+                className="absolute inset-0 w-1/3"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
+                }}
+              />
+            </motion.div>
+            {/* Percentage label */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-bold text-white drop-shadow">
+                {progressPercent.toFixed(1)}%
+              </span>
+            </div>
           </div>
 
           {/* Savings Trend Chart */}
