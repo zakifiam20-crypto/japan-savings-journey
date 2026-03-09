@@ -16,6 +16,42 @@ import { format, startOfWeek, endOfWeek, eachWeekOfInterval, isWithinInterval } 
 import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
+function TypewriterText() {
+  const texts = [
+    'Bismillah tidak ada halangan.',
+    'Menabung hari ini, terbang besok.',
+    'Satu langkah lebih dekat ke Jepang 🗻'
+  ];
+  const [index, setIndex] = useState(0);
+  const [displayed, setDisplayed] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = texts[index];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setDisplayed(current.slice(0, displayed.length + 1));
+        if (displayed.length + 1 === current.length) {
+          setTimeout(() => setIsDeleting(true), 1500);
+        }
+      } else {
+        setDisplayed(current.slice(0, displayed.length - 1));
+        if (displayed.length === 0) {
+          setIsDeleting(false);
+          setIndex((prev) => (prev + 1) % texts.length);
+        }
+      }
+    }, isDeleting ? 40 : 80);
+    return () => clearTimeout(timeout);
+  }, [displayed, isDeleting, index]);
+
+  return (
+    <p className="text-white/80 text-lg min-h-[32px]">
+      {displayed}<span className="animate-pulse">|</span>
+    </p>
+  );
+}
+
 export default function App() {
   const [started, setStarted] = useState(false);
   const [user, setUser] = useState<User | null>(() => localStorage.getItem('japan-journey-user') as User | null);
@@ -29,10 +65,7 @@ export default function App() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('japan-journey-started', started.toString());
-  }, [started]);
-
+  
   useEffect(() => {
     if (user) {
       localStorage.setItem('japan-journey-user', user);
@@ -201,70 +234,150 @@ export default function App() {
   }, [loading, hasSavedThisWeek]);
 
   if (!started) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-[url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center">
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-10 w-full max-w-lg relative z-10 text-center border-none bg-white/90"
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Sakura particles */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-2xl pointer-events-none"
+          initial={{ 
+            top: -50, 
+            left: `${Math.random() * 100}%`,
+            rotate: 0,
+            opacity: 0.8
+          }}
+          animate={{ 
+            top: '110%',
+            rotate: 360,
+            opacity: [0.8, 0.8, 0],
+            left: `${Math.random() * 100}%`
+          }}
+          transition={{ 
+            duration: 4 + Math.random() * 4,
+            repeat: Infinity,
+            delay: Math.random() * 5,
+            ease: 'linear'
+          }}
         >
-          <div className="w-24 h-24 bg-japan-red rounded-full mx-auto mb-8 flex items-center justify-center shadow-2xl shadow-japan-red/40">
-            <TrendingUp className="text-white w-12 h-12" />
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Our Japan Saving Journey 🇯🇵</h1>
-          <p className="text-slate-600 mb-10 text-lg leading-relaxed">
-            Bismillah tidak ada halangan.
-          </p>
-          
-          <button 
-            onClick={() => setStarted(true)}
-            className="w-full btn-primary text-xl py-4 flex items-center justify-center gap-3 group"
-          >
-            Continue to App
-            <motion.div
-              animate={{ x: [0, 5, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              <Plus className="w-6 h-6" />
-            </motion.div>
-          </button>
+          🌸
         </motion.div>
-      </div>
-    );
-  }
+      ))}
+
+      {/* Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="relative z-10 text-center w-full max-w-lg"
+        style={{
+          background: 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '32px',
+          padding: '48px 40px'
+        }}
+      >
+        <motion.div
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 3 }}
+          className="text-6xl mb-6"
+        >
+          🗼
+        </motion.div>
+
+        <motion.h1
+          className="text-4xl font-black text-white mb-4 tracking-tight"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          Our Japan Saving Journey 🇯🇵
+        </motion.h1>
+
+        <TypewriterText />
+
+        <motion.button
+          onClick={() => setStarted(true)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          className="w-full mt-10 py-4 text-xl font-bold rounded-2xl text-white flex items-center justify-center gap-3"
+          style={{
+            background: 'linear-gradient(135deg, #BC002D, #ff4d6d)',
+            boxShadow: '0 0 30px rgba(188,0,45,0.5)'
+          }}
+        >
+          ✈️ Mulai Perjalanan
+        </motion.button>
+      </motion.div>
+    </div>
+  );
+}
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-japan-cream">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-8 w-full max-w-md relative z-10 text-center"
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
+      <div className="absolute inset-0 bg-black/50" />
+
+      {Array.from({ length: 12 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-2xl pointer-events-none"
+          initial={{ top: -50, left: `${Math.random() * 100}%`, rotate: 0, opacity: 0.8 }}
+          animate={{ top: '110%', rotate: 360, opacity: [0.8, 0.8, 0], left: `${Math.random() * 100}%` }}
+          transition={{ duration: 4 + Math.random() * 4, repeat: Infinity, delay: Math.random() * 5, ease: 'linear' }}
         >
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Who are you?</h2>
-          <p className="text-slate-500 mb-8">Select your profile to start tracking</p>
-          
-          <div className="space-y-4">
-            <button 
-              onClick={() => setUser('Fiam Zaki')}
-              className="w-full btn-primary flex items-center justify-center gap-3"
-            >
-              <Users className="w-5 h-5" />
-              Fiam Zaki
-            </button>
-            <button 
-              onClick={() => setUser('Ario Maulana')}
-              className="w-full bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-2xl font-semibold transition-all hover:bg-slate-50 flex items-center justify-center gap-3 shadow-sm"
-            >
-              <Users className="w-5 h-5" />
-              Ario Maulana
-            </button>
-          </div>
+          🌸
         </motion.div>
-      </div>
-    );
-  }
+      ))}
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 text-center w-full max-w-md"
+        style={{
+          background: 'rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '32px',
+          padding: '48px 40px'
+        }}
+      >
+        <h2 className="text-3xl font-black text-white mb-2">Who are you? 👤</h2>
+        <p className="text-white/60 mb-8">Pilih profilmu untuk mulai tracking</p>
+
+        <div className="space-y-4">
+          {[
+            { name: 'Fiam Zaki', emoji: '🧑‍✈️' },
+            { name: 'Ario Maulana', emoji: '👨‍🚀' }
+          ].map((u) => (
+            <motion.button
+              key={u.name}
+              onClick={() => setUser(u.name as User)}
+              whileHover={{ scale: 1.03, background: 'rgba(255,255,255,0.2)' }}
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-3 transition-all"
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <span className="text-2xl">{u.emoji}</span>
+              {u.name}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen pb-20">
