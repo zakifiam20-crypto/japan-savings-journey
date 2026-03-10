@@ -654,109 +654,206 @@ export default function App() {
       </main>
 
       {/* Add Modal */}
-      <AnimatePresence>
-        {isAdding && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAdding(false)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="glass-card p-8 w-full max-w-md relative z-10"
-            >
-              <h3 className="text-2xl font-bold mb-6">Add New Saving</h3>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Amount (Rp)</label>
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    {[50000, 100000, 150000, 200000, 500000, 1000000].map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, amount: amt.toString() })}
-                        className={`py-2 text-xs font-bold rounded-lg border transition-all ${
-                          formData.amount === amt.toString()
-                            ? 'bg-japan-red text-white border-japan-red'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-japan-red/50 hover:bg-japan-red/5'
-                        }`}
-                      >
-                        {amt >= 1000000 ? `${amt / 1000000}jt` : `${amt / 1000}rb`}
-                      </button>
-                    ))}
-                  </div>
-                  <input 
-                    type="number" 
-                    required
-                    placeholder="e.g. 1000000"
-                    className="input-field"
-                    value={formData.amount}
-                    onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Transfer Date</label>
-                  <input 
-                    type="date" 
-                    required
-                    className="input-field"
-                    value={formData.date}
-                    onChange={e => setFormData({ ...formData, date: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Proof of Transfer</label>
-                  <div className="relative">
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      className="hidden"
-                      id="proof-upload"
-                      onChange={e => setFormData({ ...formData, image: e.target.files?.[0] || null })}
-                    />
-                    <label 
-                      htmlFor="proof-upload"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border-2 border-dashed border-slate-200 hover:border-japan-red/50 hover:bg-japan-red/5 transition-all cursor-pointer text-slate-500"
-                    >
-                      <Camera className="w-5 h-5" />
-                      {formData.image ? formData.image.name : 'Upload Image'}
-                    </label>
-                  </div>
-                </div>
+<AnimatePresence>
+  {isAdding && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setIsAdding(false)}
+        className="absolute inset-0"
+        style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)" }}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 60, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 40, scale: 0.95 }}
+        transition={{ type: "spring", damping: 22, stiffness: 280 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: "460px",
+          background: "linear-gradient(160deg, #141418 0%, #1a1a24 100%)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "28px",
+          overflow: "hidden",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(188,0,45,0.15)",
+          position: "relative", zIndex: 10
+        }}
+      >
+        {/* Top accent bar */}
+        <div style={{ height: "3px", background: "linear-gradient(90deg, #BC002D, #ff4d6d, #FFD700)" }} />
 
-                <div className="flex gap-3 pt-4">
-                  <button 
-                    type="button"
-                    onClick={() => setIsAdding(false)}
-                    className="flex-1 px-6 py-3 rounded-2xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    disabled={submitting}
-                    className="flex-1 btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {submitting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-5 h-5" />
-                        Save
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+        <div style={{ padding: "32px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "8px" }}>
+            <div>
+              <p style={{ color: "#BC002D", fontSize: "11px", fontWeight: "700", letterSpacing: "3px", textTransform: "uppercase", margin: "0 0 4px 0" }}>
+                JAPAN SAVINGS
+              </p>
+              <h2 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0, letterSpacing: "-0.5px" }}>
+                Tambah Tabungan
+              </h2>
+            </div>
+            <div style={{ fontSize: "36px" }}>🗼</div>
           </div>
-        )}
-      </AnimatePresence>
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "13px", marginTop: "8px", fontStyle: "italic" }}>
+            {["一歩一歩 — Selangkah demi selangkah 🗻", "夢に向かって — Menuju impian ✈️", "頑張って — Semangat terus! 🌸", "もうすぐ — Sebentar lagi sampai! 🇯🇵"][Math.floor(Math.random() * 4)]}
+          </p>
+
+          <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", margin: "20px 0" }} />
+
+          {/* Amount */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>
+              Jumlah
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Rp 0"
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "14px", padding: "14px 18px",
+                color: "white", fontSize: "22px", fontWeight: "800",
+                outline: "none", boxSizing: "border-box", letterSpacing: "-0.5px"
+              }}
+              value={formData.amount ? `Rp ${Number(formData.amount).toLocaleString('id-ID')}` : ''}
+              onChange={e => {
+                const raw = e.target.value.replace(/\D/g, "");
+                setFormData({ ...formData, amount: raw });
+              }}
+            />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginTop: "10px" }}>
+              {[50000, 100000, 150000, 200000, 500000, 1000000].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, amount: amt.toString() })}
+                  style={{
+                    background: formData.amount === amt.toString() ? "rgba(188,0,45,0.3)" : "rgba(255,255,255,0.04)",
+                    border: formData.amount === amt.toString() ? "1px solid rgba(188,0,45,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: "10px", padding: "8px",
+                    color: formData.amount === amt.toString() ? "#ff4d6d" : "rgba(255,255,255,0.5)",
+                    fontSize: "12px", fontWeight: "700", cursor: "pointer"
+                  }}
+                >
+                  {amt >= 1000000 ? `${amt/1000000}jt` : `${amt/1000}rb`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>
+              Tanggal Transfer
+            </label>
+            <input
+              type="date"
+              required
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "14px", padding: "14px 18px",
+                color: "white", fontSize: "15px",
+                outline: "none", boxSizing: "border-box",
+                colorScheme: "dark"
+              }}
+              value={formData.date}
+              onChange={e => setFormData({ ...formData, date: e.target.value })}
+            />
+          </div>
+
+          {/* Proof Upload */}
+          <div style={{ marginBottom: "28px" }}>
+            <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>
+              Bukti Transfer (Opsional)
+            </label>
+            <label
+              htmlFor="proof-upload"
+              style={{
+                display: "block", cursor: "pointer",
+                border: "1px dashed rgba(255,255,255,0.15)",
+                borderRadius: "14px", overflow: "hidden"
+              }}
+            >
+              {formData.image ? (
+                <div style={{ position: "relative", height: "120px" }}>
+                  <img
+                    src={URL.createObjectURL(formData.image)}
+                    alt="preview"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "rgba(0,0,0,0.4)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "white", fontSize: "13px", fontWeight: "600"
+                  }}>
+                    📷 Ganti foto
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: "24px", textAlign: "center", color: "rgba(255,255,255,0.25)" }}>
+                  <div style={{ fontSize: "28px", marginBottom: "6px" }}>📎</div>
+                  <p style={{ margin: 0, fontSize: "13px" }}>Upload bukti transfer</p>
+                </div>
+              )}
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="proof-upload"
+              onChange={e => setFormData({ ...formData, image: e.target.files?.[0] || null })}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              type="button"
+              onClick={() => setIsAdding(false)}
+              style={{
+                flex: 1, padding: "14px",
+                borderRadius: "14px", border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.04)",
+                color: "rgba(255,255,255,0.5)", fontSize: "15px",
+                fontWeight: "600", cursor: "pointer"
+              }}
+            >
+              Batal
+            </button>
+            <motion.button
+              onClick={handleSubmit}
+              disabled={!formData.amount || submitting}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                flex: 2, padding: "14px",
+                borderRadius: "14px", border: "none",
+                background: "linear-gradient(135deg, #BC002D, #ff4d6d)",
+                color: "white", fontSize: "15px", fontWeight: "800",
+                cursor: !formData.amount || submitting ? "not-allowed" : "pointer",
+                opacity: !formData.amount ? 0.4 : 1,
+                boxShadow: "0 0 30px rgba(188,0,45,0.4)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px"
+              }}
+            >
+              {submitting ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> Menyimpan...</>
+              ) : (
+                <>💾 Simpan Tabungan</>
+              )}
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
 
       {/* Footer Decoration */}
       <div className="fixed bottom-0 left-0 w-full h-1 bg-japan-red opacity-20" />
