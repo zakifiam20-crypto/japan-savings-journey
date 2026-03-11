@@ -119,10 +119,7 @@ export default function App() {
     fetchProfiles();
   };
 
-  const handleAvatarDelete = async (userName: string) => {
-    await supabase.from('profiles').upsert({ user_name: userName, avatar_url: null });
-    fetchProfiles();
-  };
+
 
   const fetchTransactions = async () => {
     try {
@@ -382,62 +379,66 @@ export default function App() {
         <h2 className="text-3xl font-black text-white mb-2">Who are you? 👤</h2>
         <p className="text-white/60 mb-8">Pilih profilmu untuk mulai tracking</p>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[
             { name: 'Fiam Zaki', emoji: '🧑‍✈️' },
             { name: 'Ario Maulana', emoji: '👨‍🚀' }
           ].map((u) => (
-            <div key={u.name} style={{ position: 'relative' }}>
-              <motion.button
-                onClick={() => setUser(u.name as User)}
-                whileHover={{ scale: 1.03, background: 'rgba(255,255,255,0.2)' }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center gap-3 transition-all px-4"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  backdropFilter: 'blur(10px)'
-                }}
-              >
-                {profiles[u.name] ? (
-                  <img src={profiles[u.name]} alt={u.name}
-                    style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(188,0,45,0.5)', flexShrink: 0 }} />
-                ) : (
-                  <span className="text-2xl" style={{ flexShrink: 0 }}>{u.emoji}</span>
-                )}
-                {u.name}
-              </motion.button>
+            <div key={u.name} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Avatar upload area */}
               <label
                 htmlFor={`avatar-${u.name}`}
                 onClick={(e) => e.stopPropagation()}
-                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', color: 'white', fontWeight: '700', zIndex: 10 }}
+                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}
               >
-              📷
-              </label>
-              {profiles[u.name] && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAvatarDelete(u.name);
+                {profiles[u.name] ? (
+                  <img src={profiles[u.name]} alt={u.name}
+                    style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(188,0,45,0.6)', display: 'block' }} />
+                ) : (
+                  <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(188,0,45,0.15)', border: '2px dashed rgba(188,0,45,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
+                    {u.emoji}
+                  </div>
+                )}
+                <div style={{ position: 'absolute', bottom: 0, right: 0, width: '18px', height: '18px', borderRadius: '50%', background: '#BC002D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', border: '1.5px solid rgba(255,255,255,0.3)' }}>
+                  📷
+                </div>
+                <input
+                  id={`avatar-${u.name}`}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) await handleAvatarUpload(file, u.name);
                   }}
-                  style={{ position: 'absolute', right: '60px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', background: 'rgba(188,0,45,0.3)', border: '1px solid rgba(188,0,45,0.5)', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', color: 'white', fontWeight: '700', zIndex: 10 }}
-                >
-                  🗑️
-                </button>
-              )}
-              <input
-                id={`avatar-${u.name}`}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file) await handleAvatarUpload(file, u.name);
+                />
+              </label>
+
+              {/* Name button */}
+              <motion.button
+                onClick={() => setUser(u.name as User)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  flex: 1, padding: '16px 20px',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                  color: 'white', fontSize: '17px', fontWeight: '700',
+                  cursor: 'pointer', textAlign: 'left',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                 }}
-              />
+              >
+                <span>{u.name}</span>
+                <span style={{ fontSize: '18px', opacity: 0.6 }}>→</span>
+              </motion.button>
             </div>
           ))}
         </div>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: '16px', textAlign: 'center' }}>
+          Tap foto untuk ganti profile picture
+        </p>
       </motion.div>
     </div>
   );
