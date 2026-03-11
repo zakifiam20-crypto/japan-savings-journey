@@ -701,6 +701,7 @@ export default function App() {
                 <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100)}%` }} transition={{ duration: 1.2, ease: 'easeOut' }}
                   style={{ height: '100%', borderRadius: '99px', background: person.color }} />
               </div>
+              <p style={{ color: th.textMuted, fontSize: '10px', margin: '6px 0 0 0' }}>Target: Rp 25 jt / orang</p>
             </div>
           ))}
 
