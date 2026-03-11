@@ -399,8 +399,8 @@ export default function App() {
                     {u.emoji}
                   </div>
                 )}
-                <div style={{ position: 'absolute', bottom: 0, right: 0, width: '18px', height: '18px', borderRadius: '50%', background: '#BC002D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', border: '1.5px solid rgba(255,255,255,0.3)' }}>
-                  📷
+                <div style={{ position: 'absolute', bottom: 0, right: 0, width: '18px', height: '18px', borderRadius: '50%', background: '#BC002D', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid rgba(255,255,255,0.5)' }}>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="white"><path d="M12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4zm6-11.2h-1.5l-1.7-2H9.2L7.5 4H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/></svg>
                 </div>
                 <input
                   id={`avatar-${u.name}`}
