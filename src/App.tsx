@@ -5,16 +5,18 @@ import {
   Plus, 
   History, 
   TrendingUp, 
-  Users, 
-  Camera, 
   LogOut, 
   Loader2,
-  CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Trash2,
+  Sun,
+  Moon,
+  Target,
+  MessageSquare
 } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachWeekOfInterval, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 import confetti from 'canvas-confetti';
 
 function TypewriterText() {
@@ -60,10 +62,14 @@ export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('japan-theme') !== 'light');
+  const [monthlyTarget, setMonthlyTarget] = useState(() => Number(localStorage.getItem('japan-monthly-target')) || 2000000);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     amount: '',
     date: format(new Date(), 'yyyy-MM-dd'),
-    image: null as File | null
+    image: null as File | null,
+    note: ''
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -75,6 +81,14 @@ export default function App() {
       localStorage.removeItem('japan-journey-user');
     }
   }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem('japan-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('japan-monthly-target', monthlyTarget.toString());
+  }, [monthlyTarget]);
 
   useEffect(() => {
     fetchTransactions();
@@ -120,6 +134,19 @@ export default function App() {
   };
 
 
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Hapus tabungan ini?')) return;
+    setDeletingId(id);
+    try {
+      await supabase.from('transactions').delete().eq('id', id);
+      fetchTransactions();
+    } catch (err) {
+      console.error('Error deleting:', err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -175,7 +202,8 @@ export default function App() {
           user_name: user,
           amount: parseFloat(formData.amount),
           date: formData.date,
-          proof_image_url: imageUrl
+          proof_image_url: imageUrl,
+          note: formData.note || null
         }
       ]);
 
@@ -184,7 +212,8 @@ export default function App() {
       setFormData({
         amount: '',
         date: format(new Date(), 'yyyy-MM-dd'),
-        image: null
+        image: null,
+        note: ''
       });
       setIsAdding(false);
       fetchTransactions();
@@ -212,6 +241,52 @@ export default function App() {
 
   const totalCombined = totalUser1 + totalUser2;
   const progressPercent = Math.min((totalCombined / GOAL_AMOUNT) * 100, 100);
+
+  // Countdown estimasi
+  const remaining = GOAL_AMOUNT - totalCombined;
+  const weeksElapsed = (() => {
+    if (transactions.length === 0) return 1;
+    const oldest = new Date(transactions[transactions.length - 1].date);
+    const diff = (new Date().getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24 * 7);
+    return Math.max(diff, 1);
+  })();
+  const avgPerWeek = totalCombined / weeksElapsed;
+  const weeksNeeded = avgPerWeek > 0 ? Math.ceil(remaining / avgPerWeek) : null;
+  const estimatedDate = weeksNeeded ? new Date(Date.now() + weeksNeeded * 7 * 24 * 60 * 60 * 1000) : null;
+
+  // Monthly target
+  const thisMonthSaved = transactions
+    .filter(t => {
+      const d = new Date(t.date);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+  const monthlyProgress = Math.min((thisMonthSaved / monthlyTarget) * 100, 100);
+
+  // Pie chart data
+  const pieData = [
+    { name: 'Fiam Zaki', value: totalUser1 || 0.01 },
+    { name: 'Ario Maulana', value: totalUser2 || 0.01 },
+  ];
+  const PIE_COLORS = ['#3b82f6', '#10b981'];
+
+  // Theme colors
+  const th = darkMode ? {
+    bg: '#0a0a0f', cardBg: 'rgba(255,255,255,0.03)', cardBorder: 'rgba(255,255,255,0.06)',
+    text: 'white', textSub: 'rgba(255,255,255,0.4)', textMuted: 'rgba(255,255,255,0.2)',
+    headerBg: 'rgba(10,10,15,0.9)', inputBg: 'rgba(255,255,255,0.04)', inputBorder: 'rgba(255,255,255,0.1)',
+    chartGrid: 'rgba(255,255,255,0.04)', chartTick: 'rgba(255,255,255,0.2)',
+    tooltipBg: '#111118', tooltipBorder: 'rgba(255,255,255,0.08)',
+    deleteHover: 'rgba(239,68,68,0.15)'
+  } : {
+    bg: '#f8f8fa', cardBg: 'white', cardBorder: 'rgba(0,0,0,0.08)',
+    text: '#111', textSub: 'rgba(0,0,0,0.45)', textMuted: 'rgba(0,0,0,0.25)',
+    headerBg: 'rgba(248,248,250,0.95)', inputBg: 'rgba(0,0,0,0.03)', inputBorder: 'rgba(0,0,0,0.12)',
+    chartGrid: 'rgba(0,0,0,0.05)', chartTick: 'rgba(0,0,0,0.3)',
+    tooltipBg: 'white', tooltipBorder: 'rgba(0,0,0,0.1)',
+    deleteHover: 'rgba(239,68,68,0.08)'
+  };
 
   // Prepare chart data (Last 8 weeks)
   const chartData = (() => {
@@ -445,17 +520,25 @@ export default function App() {
 }
 
   return (
-    <div style={{ minHeight: '100vh', paddingBottom: '80px', background: '#0a0a0f', color: 'white' }}>
+    <div style={{ minHeight: '100vh', paddingBottom: '80px', background: th.bg, color: th.text, transition: 'background 0.3s, color 0.3s' }}>
       {/* Header */}
-      <header style={{ background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: 0, zIndex: 30 }}>
+      <header style={{ background: th.headerBg, backdropFilter: 'blur(24px)', borderBottom: `1px solid ${th.cardBorder}`, position: 'sticky', top: 0, zIndex: 30, transition: 'background 0.3s' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <TrendingUp className="text-white w-4 h-4" />
             </div>
-            <span style={{ fontWeight: '700', fontSize: '16px', color: 'white', letterSpacing: '-0.3px' }}>Our Japan Journey <span style={{ opacity: 0.8 }}>🇯🇵</span></span>
+            <span style={{ fontWeight: '700', fontSize: '16px', color: th.text, letterSpacing: '-0.3px' }}>Our Japan Journey <span style={{ opacity: 0.8 }}>🇯🇵</span></span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Dark/Light toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '8px', padding: '7px', cursor: 'pointer', color: th.textSub, display: 'flex', transition: 'all 0.2s' }}
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
             {profiles[user!] ? (
               <img src={profiles[user!]} alt={user!} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(188,0,45,0.6)' }} />
             ) : (
@@ -464,13 +547,10 @@ export default function App() {
               </div>
             )}
             <div>
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: 0 }}>Logged in as</p>
+              <p style={{ color: th.textMuted, fontSize: '9px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: 0 }}>Logged in as</p>
               <p style={{ color: '#ff6b81', fontWeight: '700', margin: 0, fontSize: '13px' }}>{user}</p>
             </div>
-            <button
-              onClick={() => setUser(null)}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '7px', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', display: 'flex', marginLeft: '4px' }}
-            >
+            <button onClick={() => setUser(null)} style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '8px', padding: '7px', cursor: 'pointer', color: th.textSub, display: 'flex', marginLeft: '4px' }}>
               <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -492,11 +572,8 @@ export default function App() {
 
         {/* Inactivity Notification */}
         {!hasSavedThisWeek && !loading && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', borderRadius: '14px', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '10px' }}
-          >
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', borderRadius: '14px', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '16px' }}>✦</span>
             <p style={{ color: 'rgba(251,191,36,0.8)', margin: 0, fontSize: '13px', fontWeight: '500' }}>
               Belum nabung minggu ini — jangan biarkan mimpi ke Jepang pudar! 🇯🇵
@@ -505,18 +582,15 @@ export default function App() {
         )}
 
         {/* Goal Card */}
-        <section style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '28px', overflow: 'hidden', position: 'relative' }}>
-          {/* Subtle top accent */}
+        <section style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '20px', padding: '28px', overflow: 'hidden', position: 'relative', boxShadow: darkMode ? 'none' : '0 2px 16px rgba(0,0,0,0.06)' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #BC002D, #ff4d6d, transparent)' }} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Amount row */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Total Tabungan</p>
+                <p style={{ color: th.textMuted, fontSize: '11px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Total Tabungan</p>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontSize: '36px', fontWeight: '800', color: 'white', letterSpacing: '-1px', lineHeight: 1 }}>Rp {totalCombined.toLocaleString('id-ID')}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '14px' }}>/ Rp {GOAL_AMOUNT.toLocaleString('id-ID')}</span>
+                  <span style={{ fontSize: '36px', fontWeight: '800', color: th.text, letterSpacing: '-1px', lineHeight: 1 }}>Rp {totalCombined.toLocaleString('id-ID')}</span>
+                  <span style={{ color: th.textMuted, fontSize: '14px' }}>/ Rp {GOAL_AMOUNT.toLocaleString('id-ID')}</span>
                 </div>
               </div>
               <div style={{ background: 'rgba(188,0,45,0.1)', border: '1px solid rgba(188,0,45,0.2)', borderRadius: '8px', padding: '6px 12px' }}>
@@ -525,25 +599,18 @@ export default function App() {
             </div>
 
             {/* Progress bar */}
-            <div style={{ position: 'relative', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 1.5, ease: 'easeOut' }}
-                style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, #BC002D, #ff4d6d)' }}
-              >
-                <motion.div
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-                  style={{ position: 'absolute', inset: 0, width: '40%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }}
-                />
+            <div style={{ position: 'relative', height: '6px', background: darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)', borderRadius: '99px', overflow: 'hidden' }}>
+              <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, #BC002D, #ff4d6d)' }}>
+                <motion.div animate={{ x: ['-100%', '200%'] }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                  style={{ position: 'absolute', inset: 0, width: '40%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }} />
               </motion.div>
             </div>
 
             {/* Chart */}
             <div>
-              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px 0' }}>Tren Mingguan</p>
-              <div style={{ height: '140px' }}>
+              <p style={{ color: th.textMuted, fontSize: '10px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px 0' }}>Tren Mingguan</p>
+              <div style={{ height: '130px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                     <defs>
@@ -552,13 +619,11 @@ export default function App() {
                         <stop offset="95%" stopColor="#BC002D" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.2)' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={th.chartGrid} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: th.chartTick }} />
                     <YAxis hide />
-                    <Tooltip
-                      contentStyle={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: '#111118', color: 'white', fontSize: '12px' }}
-                      formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Tabungan']}
-                    />
+                    <Tooltip contentStyle={{ borderRadius: '10px', border: `1px solid ${th.tooltipBorder}`, background: th.tooltipBg, color: th.text, fontSize: '12px' }}
+                      formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Tabungan']} />
                     <Area type="monotone" dataKey="amount" stroke="#BC002D" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" animationDuration={1500} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -567,55 +632,105 @@ export default function App() {
           </div>
         </section>
 
-        {/* Contribution Cards */}
+        {/* Countdown + Monthly Target row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          {/* Countdown */}
+          <div style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '18px', padding: '20px', boxShadow: darkMode ? 'none' : '0 2px 12px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '18px' }}>✈️</span>
+              <p style={{ color: th.textMuted, fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: 0 }}>Estimasi Keberangkatan</p>
+            </div>
+            {estimatedDate ? (
+              <>
+                <p style={{ color: th.text, fontWeight: '800', fontSize: '20px', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>{format(estimatedDate, 'MMM yyyy')}</p>
+                <p style={{ color: '#10b981', fontSize: '12px', fontWeight: '600', margin: 0 }}>{weeksNeeded} minggu lagi 🗻</p>
+                <p style={{ color: th.textMuted, fontSize: '11px', margin: '4px 0 0 0' }}>Avg Rp {Math.round(avgPerWeek).toLocaleString('id-ID')}/minggu</p>
+              </>
+            ) : (
+              <p style={{ color: th.textMuted, fontSize: '13px', margin: 0 }}>Tambah tabungan dulu untuk estimasi</p>
+            )}
+          </div>
+
+          {/* Monthly Target */}
+          <div style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '18px', padding: '20px', boxShadow: darkMode ? 'none' : '0 2px 12px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Target className="w-4 h-4" style={{ color: '#f59e0b' }} />
+                <p style={{ color: th.textMuted, fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: 0 }}>Target Bulan Ini</p>
+              </div>
+            </div>
+            <p style={{ color: th.text, fontWeight: '800', fontSize: '18px', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>Rp {thisMonthSaved.toLocaleString('id-ID')}</p>
+            <p style={{ color: th.textMuted, fontSize: '11px', margin: '0 0 10px 0' }}>dari Rp {monthlyTarget.toLocaleString('id-ID')}</p>
+            <div style={{ height: '4px', background: darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)', borderRadius: '99px', overflow: 'hidden', marginBottom: '10px' }}>
+              <motion.div initial={{ width: 0 }} animate={{ width: `${monthlyProgress}%` }} transition={{ duration: 1.2, ease: 'easeOut' }}
+                style={{ height: '100%', borderRadius: '99px', background: monthlyProgress >= 100 ? '#10b981' : '#f59e0b' }} />
+            </div>
+            <input
+              type="number"
+              value={monthlyTarget}
+              onChange={e => setMonthlyTarget(Number(e.target.value))}
+              style={{ width: '100%', background: th.inputBg, border: `1px solid ${th.inputBorder}`, borderRadius: '8px', padding: '6px 10px', color: th.text, fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+              placeholder="Ubah target bulanan"
+            />
+          </div>
+        </div>
+
+        {/* Contribution Cards + Pie Chart */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           {[
             { name: 'Fiam Zaki', emoji: '🧑‍✈️', total: totalUser1, color: '#3b82f6' },
             { name: 'Ario Maulana', emoji: '👨‍🚀', total: totalUser2, color: '#10b981' }
           ].map((person) => (
-            <div key={person.name} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '18px', padding: '20px' }}>
+            <div key={person.name} style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '18px', padding: '20px', boxShadow: darkMode ? 'none' : '0 2px 12px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                 {profiles[person.name] ? (
-                  <img src={profiles[person.name]} alt={person.name}
-                    style={{ width: '42px', height: '42px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }} />
+                  <img src={profiles[person.name]} alt={person.name} style={{ width: '42px', height: '42px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${person.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                    {person.emoji}
-                  </div>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${person.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>{person.emoji}</div>
                 )}
                 <div>
-                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 2px 0' }}>{person.name.split(' ')[0]}</p>
-                  <p style={{ color: 'white', fontWeight: '700', fontSize: '15px', margin: 0 }}>Rp {person.total.toLocaleString('id-ID')}</p>
+                  <p style={{ color: th.textMuted, fontSize: '10px', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 2px 0' }}>{person.name.split(' ')[0]}</p>
+                  <p style={{ color: th.text, fontWeight: '700', fontSize: '14px', margin: 0 }}>Rp {person.total.toLocaleString('id-ID')}</p>
                 </div>
               </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Progress</span>
-                  <span style={{ color: `${person.color}cc`, fontSize: '10px', fontWeight: '700' }}>{Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100).toFixed(1)}%</span>
-                </div>
-                <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100)}%` }}
-                    transition={{ duration: 1.2, ease: 'easeOut' }}
-                    style={{ height: '100%', borderRadius: '99px', background: person.color }}
-                  />
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: th.textMuted, fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Progress</span>
+                <span style={{ color: `${person.color}cc`, fontSize: '10px', fontWeight: '700' }}>{Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100).toFixed(1)}%</span>
+              </div>
+              <div style={{ height: '4px', background: darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)', borderRadius: '99px', overflow: 'hidden' }}>
+                <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100)}%` }} transition={{ duration: 1.2, ease: 'easeOut' }}
+                  style={{ height: '100%', borderRadius: '99px', background: person.color }} />
               </div>
             </div>
           ))}
+
+          {/* Pie Chart card */}
+          <div style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '18px', padding: '20px', boxShadow: darkMode ? 'none' : '0 2px 12px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: th.textMuted, fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Kontribusi</p>
+            <PieChart width={110} height={110}>
+              <Pie data={pieData} cx={50} cy={50} innerRadius={28} outerRadius={48} dataKey="value" strokeWidth={0}>
+                {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+              </Pie>
+            </PieChart>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+              {pieData.map((d, i) => (
+                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: PIE_COLORS[i] }} />
+                  <span style={{ color: th.textSub, fontSize: '10px' }}>{d.name.split(' ')[0]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* History Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <History className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
-            <h3 style={{ fontWeight: '700', fontSize: '15px', margin: 0, color: 'rgba(255,255,255,0.7)' }}>Riwayat Tabungan</h3>
+            <History className="w-4 h-4" style={{ color: th.textMuted }} />
+            <h3 style={{ fontWeight: '700', fontSize: '15px', margin: 0, color: th.textSub }}>Riwayat Tabungan</h3>
           </div>
-          <button
-            onClick={() => setIsAdding(true)}
-            style={{ background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', border: 'none', borderRadius: '10px', padding: '9px 16px', color: 'white', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 0 20px rgba(188,0,45,0.3)' }}
-          >
+          <button onClick={() => setIsAdding(true)}
+            style={{ background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', border: 'none', borderRadius: '10px', padding: '9px 16px', color: 'white', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 0 20px rgba(188,0,45,0.3)' }}>
             <Plus className="w-4 h-4" />
             Tambah
           </button>
@@ -624,24 +739,19 @@ export default function App() {
         {/* Transaction List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', color: th.textMuted }}>
               <Loader2 className="w-6 h-6 animate-spin mb-2" />
               <p style={{ margin: 0, fontSize: '13px' }}>Memuat data...</p>
             </div>
           ) : transactions.length === 0 ? (
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '48px', textAlign: 'center', color: 'rgba(255,255,255,0.2)' }}>
+            <div style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '18px', padding: '48px', textAlign: 'center', color: th.textMuted }}>
               <TrendingUp className="w-8 h-8 mx-auto mb-3 opacity-30" />
               <p style={{ margin: 0, fontSize: '13px' }}>Belum ada tabungan. Mulai sekarang!</p>
             </div>
           ) : (
             transactions.map((t) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                key={t.id}
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-              >
+              <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} key={t.id}
+                style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: '14px', padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: darkMode ? 'none' : '0 1px 6px rgba(0,0,0,0.04)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div style={{
                     width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '12px', flexShrink: 0,
@@ -651,26 +761,28 @@ export default function App() {
                     {t.user_name.split(' ')[0].slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p style={{ fontWeight: '700', fontSize: '15px', margin: '0 0 2px 0', color: 'white' }}>Rp {t.amount.toLocaleString('id-ID')}</p>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>{t.user_name} · {format(new Date(t.date), 'dd MMM yyyy')}</p>
+                    <p style={{ fontWeight: '700', fontSize: '15px', margin: '0 0 2px 0', color: th.text }}>Rp {t.amount.toLocaleString('id-ID')}</p>
+                    <p style={{ fontSize: '11px', color: th.textMuted, margin: 0 }}>{t.user_name} · {format(new Date(t.date), 'dd MMM yyyy')}</p>
+                    {(t as any).note && <p style={{ fontSize: '11px', color: th.textSub, margin: '3px 0 0 0', fontStyle: 'italic' }}>"{(t as any).note}"</p>}
                   </div>
                 </div>
-                
-                {t.proof_image_url && (
-                  <a
-                    href={t.proof_image_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ position: 'relative', width: '44px', height: '44px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, display: 'block', border: '1px solid rgba(255,255,255,0.08)' }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {t.proof_image_url && (
+                    <a href={t.proof_image_url} target="_blank" rel="noopener noreferrer"
+                      style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, display: 'block', border: `1px solid ${th.cardBorder}` }}>
+                      <img src={t.proof_image_url} alt="Proof" style={{ width: '100%', height: '100%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
+                    </a>
+                  )}
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    disabled={deletingId === t.id}
+                    style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: `1px solid ${th.cardBorder}`, cursor: 'pointer', color: 'rgba(239,68,68,0.5)', flexShrink: 0, transition: 'all 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.1)', e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)', e.currentTarget.style.color = '#f87171')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent', e.currentTarget.style.borderColor = th.cardBorder, e.currentTarget.style.color = 'rgba(239,68,68,0.5)')}
                   >
-                    <img
-                      src={t.proof_image_url}
-                      alt="Proof"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      referrerPolicy="no-referrer"
-                    />
-                  </a>
-                )}
+                    {deletingId === t.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </motion.div>
             ))
           )}
@@ -787,6 +899,26 @@ export default function App() {
               }}
               value={formData.date}
               onChange={e => setFormData({ ...formData, date: e.target.value })}
+            />
+          </div>
+
+          {/* Note */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", display: "block", marginBottom: "10px" }}>
+              Catatan (Opsional)
+            </label>
+            <input
+              type="text"
+              placeholder="Contoh: nabung dari freelance..."
+              style={{
+                width: "100%", background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "14px", padding: "12px 16px",
+                color: "white", fontSize: "14px",
+                outline: "none", boxSizing: "border-box"
+              }}
+              value={formData.note}
+              onChange={e => setFormData({ ...formData, note: e.target.value })}
             />
           </div>
 
