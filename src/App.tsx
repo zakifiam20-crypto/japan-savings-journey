@@ -55,6 +55,7 @@ function TypewriterText() {
 
 export default function App() {
   const [started, setStarted] = useState(false);
+  const [profiles, setProfiles] = useState<{[key: string]: string}>({});
   const [user, setUser] = useState<User | null>(() => localStorage.getItem('japan-journey-user') as User | null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,8 +78,7 @@ export default function App() {
 
   useEffect(() => {
     fetchTransactions();
-    
-    // Request Notification Permission
+    fetchProfiles();
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
@@ -99,6 +99,25 @@ export default function App() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const fetchProfiles = async () => {
+    const { data } = await supabase.from('profiles').select('*');
+    if (data) {
+      const map: {[key: string]: string} = {};
+      data.forEach((p: any) => { if (p.avatar_url) map[p.user_name] = p.avatar_url; });
+      setProfiles(map);
+    }
+  };
+
+  const handleAvatarUpload = async (file: File, userName: string) => {
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${userName}-${Date.now()}.${fileExt}`;
+    const { error } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    await supabase.from('profiles').upsert({ user_name: userName, avatar_url: data.publicUrl });
+    fetchProfiles();
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -363,21 +382,44 @@ export default function App() {
             { name: 'Fiam Zaki', emoji: '🧑‍✈️' },
             { name: 'Ario Maulana', emoji: '👨‍🚀' }
           ].map((u) => (
-            <motion.button
-              key={u.name}
-              onClick={() => setUser(u.name as User)}
-              whileHover={{ scale: 1.03, background: 'rgba(255,255,255,0.2)' }}
-              whileTap={{ scale: 0.97 }}
-              className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-3 transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              <span className="text-2xl">{u.emoji}</span>
-              {u.name}
-            </motion.button>
+            <div key={u.name} style={{ position: 'relative' }}>
+              <motion.button
+                onClick={() => setUser(u.name as User)}
+                whileHover={{ scale: 1.03, background: 'rgba(255,255,255,0.2)' }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center gap-3 transition-all px-4"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                {profiles[u.name] ? (
+                  <img src={profiles[u.name]} alt={u.name}
+                    style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(188,0,45,0.5)', flexShrink: 0 }} />
+                ) : (
+                  <span className="text-2xl" style={{ flexShrink: 0 }}>{u.emoji}</span>
+                )}
+                {u.name}
+              </motion.button>
+              <label
+                htmlFor={`avatar-${u.name}`}
+                onClick={(e) => e.stopPropagation()}
+                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', color: 'white', fontWeight: '700', zIndex: 10 }}
+              >
+                📷
+              </label>
+              <input
+                id={`avatar-${u.name}`}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) await handleAvatarUpload(file, u.name);
+                }}
+              />
+            </div>
           ))}
         </div>
       </motion.div>
@@ -532,9 +574,14 @@ export default function App() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="glass-card p-6 space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-                <Users className="w-6 h-6" />
-              </div>
+              {profiles['Fiam Zaki'] ? (
+                <img src={profiles['Fiam Zaki']} alt="Fiam Zaki"
+                  style={{ width: '48px', height: '48px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                  <Users className="w-6 h-6" />
+                </div>
+              )}
               <div>
                 <p className="text-sm text-slate-500 font-medium">Fiam Zaki Contribution</p>
                 <p className="text-xl font-bold">Rp {totalUser1.toLocaleString('id-ID')}</p>
@@ -557,9 +604,14 @@ export default function App() {
 
           <div className="glass-card p-6 space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
-                <Users className="w-6 h-6" />
-              </div>
+              {profiles['Ario Maulana'] ? (
+                <img src={profiles['Ario Maulana']} alt="Ario Maulana"
+                  style={{ width: '48px', height: '48px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                  <Users className="w-6 h-6" />
+                </div>
+              )}
               <div>
                 <p className="text-sm text-slate-500 font-medium">Ario Maulana Contribution</p>
                 <p className="text-xl font-bold">Rp {totalUser2.toLocaleString('id-ID')}</p>
