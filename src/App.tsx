@@ -445,280 +445,230 @@ export default function App() {
 }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div style={{ minHeight: '100vh', paddingBottom: '80px', background: '#0a0a0f', color: 'white' }}>
       {/* Header */}
-      <header style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 30 }}>
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(188,0,45,0.4)' }}>
-              <TrendingUp className="text-white w-5 h-5" />
+      <header style={{ background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: 0, zIndex: 30 }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TrendingUp className="text-white w-4 h-4" />
             </div>
-            <h1 className="font-bold text-xl hidden sm:block text-white">Our Japan Journey 🇯🇵</h1>
+            <span style={{ fontWeight: '700', fontSize: '16px', color: 'white', letterSpacing: '-0.3px' }}>Our Japan Journey <span style={{ opacity: 0.8 }}>🇯🇵</span></span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>Logged in as</p>
-              <p style={{ color: '#ff4d6d', fontWeight: '700', margin: 0 }}>{user}</p>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {profiles[user!] ? (
-              <img src={profiles[user!]} alt={user!}
-                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(188,0,45,0.5)' }} />
+              <img src={profiles[user!]} alt={user!} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(188,0,45,0.6)' }} />
             ) : (
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(188,0,45,0.2)', border: '2px solid rgba(188,0,45,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(188,0,45,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
                 {user === 'Fiam Zaki' ? '🧑‍✈️' : '👨‍🚀'}
               </div>
             )}
-            <button 
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', margin: 0 }}>Logged in as</p>
+              <p style={{ color: '#ff6b81', fontWeight: '700', margin: 0, fontSize: '13px' }}>{user}</p>
+            </div>
+            <button
               onClick={() => setUser(null)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', display: 'flex' }}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '7px', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', display: 'flex', marginLeft: '4px' }}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </header>
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+
+      <main style={{ maxWidth: '860px', margin: '0 auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
         {/* Supabase Config Warning */}
         {!isSupabaseConfigured && (
-          <div className="bg-red-50 border border-red-200 p-6 rounded-2xl text-red-800 shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-6 h-6 text-red-600" />
-              <h3 className="font-bold text-lg">Supabase Belum Dikonfigurasi</h3>
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '14px', padding: '16px 20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p style={{ color: '#f87171', fontWeight: '700', margin: '0 0 2px 0', fontSize: '13px' }}>Supabase Belum Dikonfigurasi</p>
+              <p style={{ color: 'rgba(248,113,113,0.6)', margin: 0, fontSize: '12px' }}>Atur VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di menu Secrets.</p>
             </div>
-            <p className="text-sm leading-relaxed">
-              Aplikasi ini membutuhkan Supabase untuk menyimpan data. Silakan atur <strong>VITE_SUPABASE_URL</strong> dan <strong>VITE_SUPABASE_ANON_KEY</strong> di menu Secrets AI Studio.
-            </p>
           </div>
         )}
 
         {/* Inactivity Notification */}
         {!hasSavedThisWeek && !loading && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '16px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}
+            style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', borderRadius: '14px', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '10px' }}
           >
-            <span style={{ fontSize: '22px' }}>⚠️</span>
-            <div>
-              <p style={{ color: '#fbbf24', fontWeight: '700', margin: '0 0 2px 0', fontSize: '14px' }}>Belum nabung minggu ini!</p>
-              <p style={{ color: 'rgba(251,191,36,0.6)', margin: 0, fontSize: '12px' }}>Jangan biarkan mimpi ke Jepang pudar. Yuk tambah tabungan! 🇯🇵</p>
-            </div>
+            <span style={{ fontSize: '16px' }}>✦</span>
+            <p style={{ color: 'rgba(251,191,36,0.8)', margin: 0, fontSize: '13px', fontWeight: '500' }}>
+              Belum nabung minggu ini — jangan biarkan mimpi ke Jepang pudar! 🇯🇵
+            </p>
           </motion.div>
         )}
 
         {/* Goal Card */}
-        <section className="glass-card p-8 overflow-hidden relative">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-            <div>
-              <h2 className="text-slate-500 font-medium mb-1">Total Savings Goal</h2>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-slate-900">Rp {totalCombined.toLocaleString('id-ID')}</span>
-                <span className="text-slate-400 font-medium">/ Rp {GOAL_AMOUNT.toLocaleString('id-ID')}</span>
+        <section style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '28px', overflow: 'hidden', position: 'relative' }}>
+          {/* Subtle top accent */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, #BC002D, #ff4d6d, transparent)' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Amount row */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Total Tabungan</p>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <span style={{ fontSize: '36px', fontWeight: '800', color: 'white', letterSpacing: '-1px', lineHeight: 1 }}>Rp {totalCombined.toLocaleString('id-ID')}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '14px' }}>/ Rp {GOAL_AMOUNT.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+              <div style={{ background: 'rgba(188,0,45,0.1)', border: '1px solid rgba(188,0,45,0.2)', borderRadius: '8px', padding: '6px 12px' }}>
+                <span style={{ color: '#ff6b81', fontWeight: '700', fontSize: '13px' }}>{progressPercent.toFixed(1)}% tercapai</span>
               </div>
             </div>
-            <div className="bg-japan-red/10 px-4 py-2 rounded-full">
-              <span className="text-japan-red font-bold text-lg">{progressPercent.toFixed(1)}% Completed</span>
-            </div>
-          </div>
 
-          <div className="relative h-6 bg-slate-100 rounded-full overflow-hidden mb-8 shadow-inner">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute top-0 left-0 h-full rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, #BC002D, #ff4d6d, #FFD700)',
-                boxShadow: '0 0 20px rgba(188,0,45,0.6)'
-              }}
-            >
-              {/* Shimmer effect */}
+            {/* Progress bar */}
+            <div style={{ position: 'relative', height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
               <motion.div
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-                className="absolute inset-0 w-1/3"
-                style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
-                }}
-              />
-            </motion.div>
-            {/* Percentage label */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-bold text-white drop-shadow">
-                {progressPercent.toFixed(1)}%
-              </span>
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={{ position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: '99px', background: 'linear-gradient(90deg, #BC002D, #ff4d6d)' }}
+              >
+                <motion.div
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                  style={{ position: 'absolute', inset: 0, width: '40%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)' }}
+                />
+              </motion.div>
             </div>
-          </div>
 
-          {/* Savings Trend Chart */}
-          <div className="mt-8">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Weekly Savings Trend</h3>
-            <div className="h-[200px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#BC002D" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#BC002D" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
-                  />
-                  <YAxis 
-                    hide 
-                  />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: '#1a1a24', color: 'white' }}
-                    formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Tabungan']}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="amount" 
-                    stroke="#BC002D" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorAmount)" 
-                    animationDuration={1500}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            {/* Chart */}
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px 0' }}>Tren Mingguan</p>
+              <div style={{ height: '140px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#BC002D" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#BC002D" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.2)' }} />
+                    <YAxis hide />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', background: '#111118', color: 'white', fontSize: '12px' }}
+                      formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Tabungan']}
+                    />
+                    <Area type="monotone" dataKey="amount" stroke="#BC002D" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" animationDuration={1500} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="glass-card p-6 space-y-4">
-            <div className="flex items-center gap-4">
-              {profiles['Fiam Zaki'] ? (
-                <img src={profiles['Fiam Zaki']} alt="Fiam Zaki"
-                  style={{ width: '48px', height: '48px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }} />
-              ) : (
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-                  <Users className="w-6 h-6" />
+        {/* Contribution Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          {[
+            { name: 'Fiam Zaki', emoji: '🧑‍✈️', total: totalUser1, color: '#3b82f6' },
+            { name: 'Ario Maulana', emoji: '👨‍🚀', total: totalUser2, color: '#10b981' }
+          ].map((person) => (
+            <div key={person.name} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '18px', padding: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                {profiles[person.name] ? (
+                  <img src={profiles[person.name]} alt={person.name}
+                    style={{ width: '42px', height: '42px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${person.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                    {person.emoji}
+                  </div>
+                )}
+                <div>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 2px 0' }}>{person.name.split(' ')[0]}</p>
+                  <p style={{ color: 'white', fontWeight: '700', fontSize: '15px', margin: 0 }}>Rp {person.total.toLocaleString('id-ID')}</p>
                 </div>
-              )}
+              </div>
               <div>
-                <p className="text-sm text-slate-500 font-medium">Fiam Zaki Contribution</p>
-                <p className="text-xl font-bold">Rp {totalUser1.toLocaleString('id-ID')}</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                <span>Progress</span>
-                <span>{Math.min((totalUser1 / INDIVIDUAL_GOAL) * 100, 100).toFixed(1)}% of 25M</span>
-              </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((totalUser1 / INDIVIDUAL_GOAL) * 100, 100)}%` }}
-                  className="h-full bg-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-6 space-y-4">
-            <div className="flex items-center gap-4">
-              {profiles['Ario Maulana'] ? (
-                <img src={profiles['Ario Maulana']} alt="Ario Maulana"
-                  style={{ width: '48px', height: '48px', borderRadius: '16px', objectFit: 'cover', flexShrink: 0 }} />
-              ) : (
-                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
-                  <Users className="w-6 h-6" />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Progress</span>
+                  <span style={{ color: `${person.color}cc`, fontSize: '10px', fontWeight: '700' }}>{Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100).toFixed(1)}%</span>
                 </div>
-              )}
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Ario Maulana Contribution</p>
-                <p className="text-xl font-bold">Rp {totalUser2.toLocaleString('id-ID')}</p>
+                <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((person.total / INDIVIDUAL_GOAL) * 100, 100)}%` }}
+                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                    style={{ height: '100%', borderRadius: '99px', background: person.color }}
+                  />
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                <span>Progress</span>
-                <span>{Math.min((totalUser2 / INDIVIDUAL_GOAL) * 100, 100).toFixed(1)}% of 25M</span>
-              </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((totalUser2 / INDIVIDUAL_GOAL) * 100, 100)}%` }}
-                  className="h-full bg-emerald-500"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* History Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-slate-400" />
-            <h3 className="font-bold text-lg">Saving History</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <History className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.3)' }} />
+            <h3 style={{ fontWeight: '700', fontSize: '15px', margin: 0, color: 'rgba(255,255,255,0.7)' }}>Riwayat Tabungan</h3>
           </div>
-          <button 
+          <button
             onClick={() => setIsAdding(true)}
-            className="btn-primary flex items-center gap-2 py-2"
+            style={{ background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', border: 'none', borderRadius: '10px', padding: '9px 16px', color: 'white', fontWeight: '700', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 0 20px rgba(188,0,45,0.3)' }}
           >
-            <Plus className="w-5 h-5" />
-            Add Saving
+            <Plus className="w-4 h-4" />
+            Tambah
           </button>
         </div>
 
         {/* Transaction List */}
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 className="w-8 h-8 animate-spin mb-2" />
-              <p>Loading transactions...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)' }}>
+              <Loader2 className="w-6 h-6 animate-spin mb-2" />
+              <p style={{ margin: 0, fontSize: '13px' }}>Memuat data...</p>
             </div>
           ) : transactions.length === 0 ? (
-            <div className="glass-card p-12 text-center text-slate-400">
-              <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p>No transactions yet. Start saving for Japan!</p>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '48px', textAlign: 'center', color: 'rgba(255,255,255,0.2)' }}>
+              <TrendingUp className="w-8 h-8 mx-auto mb-3 opacity-30" />
+              <p style={{ margin: 0, fontSize: '13px' }}>Belum ada tabungan. Mulai sekarang!</p>
             </div>
           ) : (
             transactions.map((t) => (
-              <motion.div 
+              <motion.div
                 layout
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 key={t.id}
-                className="glass-card p-5 flex items-center justify-between group hover:border-japan-red/30 transition-all"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold ${
-                    t.user_name === 'Fiam Zaki' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
-                  }`}>
-                    {t.user_name.split(' ')[0]}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '12px', flexShrink: 0,
+                    background: t.user_name === 'Fiam Zaki' ? 'rgba(59,130,246,0.12)' : 'rgba(16,185,129,0.12)',
+                    color: t.user_name === 'Fiam Zaki' ? '#60a5fa' : '#34d399'
+                  }}>
+                    {t.user_name.split(' ')[0].slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900">Rp {t.amount.toLocaleString('id-ID')}</p>
-                    <p className="text-sm text-slate-500">{format(new Date(t.date), 'dd MMM yyyy')}</p>
+                    <p style={{ fontWeight: '700', fontSize: '15px', margin: '0 0 2px 0', color: 'white' }}>Rp {t.amount.toLocaleString('id-ID')}</p>
+                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>{t.user_name} · {format(new Date(t.date), 'dd MMM yyyy')}</p>
                   </div>
                 </div>
                 
                 {t.proof_image_url && (
-                  <a 
-                    href={t.proof_image_url} 
-                    target="_blank" 
+                  <a
+                    href={t.proof_image_url}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-100 shadow-sm hover:scale-110 transition-transform"
+                    style={{ position: 'relative', width: '44px', height: '44px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, display: 'block', border: '1px solid rgba(255,255,255,0.08)' }}
                   >
-                    <img 
-                      src={t.proof_image_url} 
-                      alt="Proof" 
-                      className="w-full h-full object-cover"
+                    <img
+                      src={t.proof_image_url}
+                      alt="Proof"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Camera className="text-white w-4 h-4" />
-                    </div>
                   </a>
                 )}
               </motion.div>
@@ -930,7 +880,7 @@ export default function App() {
 </AnimatePresence>
 
       {/* Footer Decoration */}
-      <div className="fixed bottom-0 left-0 w-full h-1 bg-japan-red opacity-20" />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', height: '1px', background: 'rgba(188,0,45,0.3)' }} />
     </div>
   );
 }
