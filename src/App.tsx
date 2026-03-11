@@ -447,29 +447,36 @@ export default function App() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-100">
+      <header style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 30 }}>
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-japan-red rounded-full flex items-center justify-center shadow-lg shadow-japan-red/20">
+            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #BC002D, #ff4d6d)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(188,0,45,0.4)' }}>
               <TrendingUp className="text-white w-5 h-5" />
             </div>
-            <h1 className="font-bold text-xl hidden sm:block">Our Japan Journey 🇯🇵</h1>
+            <h1 className="font-bold text-xl hidden sm:block text-white">Our Japan Journey 🇯🇵</h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Logged in as</p>
-              <p className="font-semibold text-japan-red">{user}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', margin: 0 }}>Logged in as</p>
+              <p style={{ color: '#ff4d6d', fontWeight: '700', margin: 0 }}>{user}</p>
             </div>
+            {profiles[user!] ? (
+              <img src={profiles[user!]} alt={user!}
+                style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(188,0,45,0.5)' }} />
+            ) : (
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(188,0,45,0.2)', border: '2px solid rgba(188,0,45,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+                {user === 'Fiam Zaki' ? '🧑‍✈️' : '👨‍🚀'}
+              </div>
+            )}
             <button 
               onClick={() => setUser(null)}
-              className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '8px', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', display: 'flex' }}
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
       </header>
-
       <main className="max-w-4xl mx-auto px-6 py-8 space-y-8">
         {/* Supabase Config Warning */}
         {!isSupabaseConfigured && (
@@ -486,17 +493,15 @@ export default function App() {
 
         {/* Inactivity Notification */}
         {!hasSavedThisWeek && !loading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-4 text-amber-800 shadow-sm"
+            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '16px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}
           >
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-              <AlertCircle className="w-6 h-6 text-amber-600" />
-            </div>
+            <span style={{ fontSize: '22px' }}>⚠️</span>
             <div>
-              <p className="font-bold">No savings this week! ⚠️</p>
-              <p className="text-sm opacity-90">Don't let the dream fade. Let's add some savings to reach Japan! 🇯🇵</p>
+              <p style={{ color: '#fbbf24', fontWeight: '700', margin: '0 0 2px 0', fontSize: '14px' }}>Belum nabung minggu ini!</p>
+              <p style={{ color: 'rgba(251,191,36,0.6)', margin: 0, fontSize: '12px' }}>Jangan biarkan mimpi ke Jepang pudar. Yuk tambah tabungan! 🇯🇵</p>
             </div>
           </motion.div>
         )}
@@ -558,18 +563,18 @@ export default function App() {
                       <stop offset="95%" stopColor="#BC002D" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                   <XAxis 
                     dataKey="name" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
+                    tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
                   />
                   <YAxis 
                     hide 
                   />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', background: '#1a1a24', color: 'white' }}
                     formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Tabungan']}
                   />
                   <Area 
