@@ -119,6 +119,11 @@ export default function App() {
     fetchProfiles();
   };
 
+  const handleAvatarDelete = async (userName: string) => {
+    await supabase.from('profiles').upsert({ user_name: userName, avatar_url: null });
+    fetchProfiles();
+  };
+
   const fetchTransactions = async () => {
     try {
       const { data, error } = await supabase
@@ -407,8 +412,19 @@ export default function App() {
                 onClick={(e) => e.stopPropagation()}
                 style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', color: 'white', fontWeight: '700', zIndex: 10 }}
               >
-                📷
+              📷
               </label>
+              {profiles[u.name] && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAvatarDelete(u.name);
+                  }}
+                  style={{ position: 'absolute', right: '60px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', background: 'rgba(188,0,45,0.3)', border: '1px solid rgba(188,0,45,0.5)', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', color: 'white', fontWeight: '700', zIndex: 10 }}
+                >
+                  🗑️
+                </button>
+              )}
               <input
                 id={`avatar-${u.name}`}
                 type="file"
